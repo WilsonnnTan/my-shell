@@ -1,9 +1,13 @@
 [package]
 name = "codecrafters-shell"
 version = "0.1.0"
-authors = ["Codecrafters <hello@codecrafters.io>"]
+authors = ["WilsonnnTan <wilsonangelietann@gmail.com>"]
 edition = "2024"
 rust-version = "1.96"
+
+[lib]
+name = "my_shell"
+path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1.0.68"                                # error handling
