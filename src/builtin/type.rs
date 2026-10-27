@@ -6,10 +6,15 @@ impl Run for Type {
   fn run(args: &[&str]) {
     let built_in_commands = ["echo", "exit", "type"];
 
-    if built_in_commands.contains(&args[1]) {
-      println!("{} is a shell builtin", args[1])
-    } else {
-      println!("{}: not found", args[1])
+    match args.get(1) {
+      None => {}
+      Some(command) => {
+        if built_in_commands.contains(command) {
+          println!("{} is a shell builtin",command)
+        } else {
+          println!("{}: not found", command)
+        }
+      }
     }
   }
 }
