@@ -1,16 +1,16 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use my_shell::run_command;
+use my_shell::builtin::{command::Command, Run};
 
 fn main() {
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
 
-        let mut command: String = String::new();
-        io::stdin().read_line(&mut command).unwrap();
+        let mut args: String = String::new();
+        io::stdin().read_line(&mut args).unwrap();
 
-        let command: Vec<&str> = command.trim().split_whitespace().collect();
-        run_command(command);
+        let args: Vec<&str> = args.trim().split_whitespace().collect();
+        Command::run(args);
     }
 }

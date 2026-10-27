@@ -1,20 +1,19 @@
-use super::Run;
+use super::{Run, command::Command};
+
+const BUILTIN_COMMANDS: [&str; 3] = ["echo", "exit", "type"];
 
 pub struct Type;
 
 impl Run for Type {
-  fn run(args: &[&str]) {
-    let built_in_commands = ["echo", "exit", "type"];
+  fn run(args: Vec<&str>) {
+    let Some(&command) = args.get(1) else { return };
 
-    match args.get(1) {
-      None => {}
-      Some(command) => {
-        if built_in_commands.contains(command) {
-          println!("{} is a shell builtin",command)
-        } else {
-          println!("{}: not found", command)
-        }
-      }
+    if BUILTIN_COMMANDS.contains(&command) {
+      println!("{} is a shell builtin",command)
+    } else if let Some(file_path) = Command::search_executable(&command){
+      println!("{} is {}", command, file_path.display());
+    } else {
+      println!("{}: not found", command);
     }
   }
 }
