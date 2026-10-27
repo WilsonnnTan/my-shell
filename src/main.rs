@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use my_shell::built_in::{Run, echo::Echo, exit::Exit};
+use my_shell::builtin::{Run, echo::Echo, exit::Exit, r#type::Type};
 
 fn main() {
     loop {
@@ -18,6 +18,9 @@ fn main() {
         }
         else if command[0] == "echo" {
             Echo::run(&command);
+        }
+        else if command[0] == "type" {
+            Type::run(&command);
         }
         else {
             println!("{}: command not found", command[0])
