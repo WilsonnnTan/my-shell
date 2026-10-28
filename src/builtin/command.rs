@@ -13,6 +13,7 @@ use super::{
   exit::Exit, 
   r#type::Type, 
   pwd::Pwd,
+  cd::Cd,
   Run
 };
 
@@ -23,7 +24,7 @@ impl Command {
   #[cfg(unix)]
   fn is_executeable (file_path: &PathBuf) -> bool {
     match fs::metadata(file_path) {
-      Ok(meta) => meta.is_file() && meta.permissions().mode() & 0o111 != 0,
+      Ok(meta) => meta.permissions().mode() & 0o111 != 0,
       Err(e) => {
         eprintln!("Failed to read {} permission {}", file_path.display(), e);
         false
@@ -67,6 +68,7 @@ impl Run for Command {
       "echo" => Echo::run(args),
       "type" => Type::run(args),
       "pwd" => Pwd::run(args),
+      "cd" => Cd::run(args),
       _ => match Self::search_executable(command) {
         Some(file_path) => {
           // Run command with executable file

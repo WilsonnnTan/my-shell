@@ -1,12 +1,15 @@
 use super::{Run, command::Command};
 
-const BUILTIN_COMMANDS: [&str; 4] = ["echo", "exit", "type", "pwd"];
+const BUILTIN_COMMANDS: [&str; 5] = ["echo", "exit", "type", "pwd", "cd"];
 
 pub struct Type;
 
 impl Run for Type {
   fn run(args: Vec<&str>) {
-    let Some(&command) = args.get(1) else { return };
+    let Some(&command) = args.get(1) else { 
+      eprintln!("type: expected 1 args got 0");
+      return;
+    };
 
     if BUILTIN_COMMANDS.contains(&command) {
       println!("{} is a shell builtin",command)

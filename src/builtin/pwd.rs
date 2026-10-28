@@ -8,7 +8,7 @@ impl Run for Pwd {
     match env::current_dir() {
       Ok(dir) => println!("{}", dir.display()),
       Err(e) => {
-        eprintln!("failed to run pwd: {}", e);
+        eprintln!("pwd: failed to run pwd: {}", e);
         return;
       }
     }
