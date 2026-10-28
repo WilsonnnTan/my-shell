@@ -1,7 +1,20 @@
 use super::{Run};
-use std::{path::Path, env};
+use std::{env, path::PathBuf};
+use anyhow::{Result, Context};
 
 pub struct Cd;
+
+impl Cd {
+  #[cfg(windows)]
+  fn get_home_var() -> Result<String> {
+    return env::var("HOMEPATH").context("failed to read $HOMEPATH variable");
+  }
+
+  #[cfg(unix)]
+  fn get_home_var() -> Result<String> {
+    return env::var("HOME").context("failed to read $HOME variable");
+  }
+}
 
 impl Run for Cd {
   fn run(args: Vec<&str>) {
@@ -10,10 +23,21 @@ impl Run for Cd {
       return;
     };
 
-    let dir_path = Path::new(dir_path);
+    let dir_path = match dir_path {
+      "~" => match Self::get_home_var() {
+        Ok(home_dir) => PathBuf::from(home_dir),
+        Err(e) => {
+          eprintln!("cd: {}", e);
+          return;
+        },
+      },
+      _ => PathBuf::from(dir_path),
+    };
+
+    let dir_path = PathBuf::from(dir_path);
     match dir_path.is_dir() {
       true => {
-        if let Err(e) = env::set_current_dir(dir_path) {
+        if let Err(e) = env::set_current_dir(&dir_path) {
           eprintln!("cd: {}: {}", dir_path.display(), e);
         }
       },
