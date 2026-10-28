@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, process};
+use std::{env, path::PathBuf, process, ffi::OsString};
 
 #[cfg(unix)]
 use std::{fs, os::unix::fs::PermissionsExt};
@@ -27,7 +27,10 @@ impl Command {
   // Search executable in PATH
   pub fn search_executable(command: &str) -> Option<PathBuf>{
     // use OsString to support all Os buf
-    let path_var= env::var_os("PATH").unwrap();
+    let path_var= env::var_os("PATH").unwrap_or_else( || {
+      eprintln!("could not read $PATH");
+      OsString::new()
+    });
     let paths= env::split_paths(&path_var);
 
     for path in paths {
