@@ -1,4 +1,9 @@
-use std::{env, path::PathBuf, process, ffi::OsString};
+use std::{
+  env, 
+  path::{Path, PathBuf}, 
+  process, 
+  ffi::OsString
+};
 
 #[cfg(unix)]
 use std::{fs, os::unix::fs::PermissionsExt};
@@ -17,11 +22,13 @@ impl Command {
   // check file execute permission
   #[cfg(unix)]
   fn is_executeable (file_path: &PathBuf) -> bool {
-    let mode = fs::metadata(file_path).unwrap().permissions().mode();
-    if mode & 0o111 != 0 {
-      return true;
+    match fs::metadata(file_path) {
+      Ok(meta) => meta.is_file() && meta.permissions().mode() & 0o111 != 0,
+      Err(e) => {
+        eprintln!("Failed to read {} permission {}", file_path.display(), e);
+        false
+      }
     }
-    false
   }
 
   // windows doesnt need to check execute permission
@@ -64,7 +71,7 @@ impl Run for Command {
         Some(file_path) => {
           // Run command with executable file
           let out = process::Command::new(command)
-            .current_dir(file_path.parent().unwrap())
+            .current_dir(file_path.parent().unwrap_or(Path::new(".")))
             .args(&args[1..])
             .output()
             .expect("Exectuable exist but failed to run");
