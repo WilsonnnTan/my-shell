@@ -1,6 +1,6 @@
 use super::{Run, command::Command};
 
-const BUILTIN_COMMANDS: [&str; 3] = ["echo", "exit", "type"];
+const BUILTIN_COMMANDS: [&str; 4] = ["echo", "exit", "type", "pwd"];
 
 pub struct Type;
 

@@ -3,7 +3,13 @@ use std::{env, path::PathBuf, process, ffi::OsString};
 #[cfg(unix)]
 use std::{fs, os::unix::fs::PermissionsExt};
 
-use super::{echo::Echo, exit::Exit, r#type::Type, Run};
+use super::{
+  echo::Echo, 
+  exit::Exit, 
+  r#type::Type, 
+  pwd::Pwd,
+  Run
+};
 
 pub struct Command;
 
@@ -53,6 +59,7 @@ impl Run for Command {
       "exit" => Exit::run(args),
       "echo" => Echo::run(args),
       "type" => Type::run(args),
+      "pwd" => Pwd::run(args),
       _ => match Self::search_executable(command) {
         Some(file_path) => {
           // Run command with executable file
