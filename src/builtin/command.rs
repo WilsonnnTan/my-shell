@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, process};
 
 #[cfg(unix)]
 use std::{fs, os::unix::fs::PermissionsExt};
@@ -51,8 +51,16 @@ impl Run for Command {
       "echo" => Echo::run(args),
       "type" => Type::run(args),
       _ => match Self::search_executable(command) {
-        Some(_) => {
+        Some(file_path) => {
           // Run command with executable file
+          let out = process::Command::new(command)
+            .current_dir(file_path.parent().unwrap())
+            .args(&args[1..])
+            .output()
+            .expect("Exectuable exist but failed to run");
+
+          print!("{}", String::from_utf8_lossy(&out.stdout));
+          eprint!("{}", String::from_utf8_lossy(&out.stderr));
         }
         None => println!("{}: command not found", command),
       }
