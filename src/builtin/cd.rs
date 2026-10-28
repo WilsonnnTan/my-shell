@@ -34,7 +34,6 @@ impl Run for Cd {
       _ => PathBuf::from(dir_path),
     };
 
-    let dir_path = PathBuf::from(dir_path);
     match dir_path.is_dir() {
       true => {
         if let Err(e) = env::set_current_dir(&dir_path) {
