@@ -33,13 +33,10 @@ impl Parser {
       }
     }
 
-    if in_single_quote {
-      bail!("uncompleted single quote");
-    }
+    if in_single_quote { bail!("uncompleted single quote") }
+    if in_double_quote { bail!("uncompleted double quote") }
 
-    if arg.len() > 0 {
-      parsed_args.push(arg);
-    }
+    if arg.len() > 0 { parsed_args.push(arg) }
     
     Ok(parsed_args)
   }
@@ -166,9 +163,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "uncompleted single quote")]
-    fn uncompleted_single_quote() {
-      Parser::parse(String::from("echo hello'world")).unwrap();
+    #[should_panic(expected = "uncompleted double quote")]
+    fn uncompleted_double_quote() {
+      Parser::parse(String::from(r#"echo hello"world"#)).unwrap();
     }
   }
 }

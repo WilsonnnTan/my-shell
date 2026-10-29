@@ -15,7 +15,10 @@ fn main() -> Result<()> {
         let mut args: String = String::new();
         io::stdin().read_line(&mut args)?;
         // use parser from library instead of hardcode on main.rs
-        let args: Vec<String> = Parser::parse(args).unwrap();
+        let args: Vec<String> = Parser::parse(args).unwrap_or_else( |e| {
+            eprintln!("failed to parse: {}", e);
+            Vec::new()
+        });
         Command::run(args);
     }
 }
