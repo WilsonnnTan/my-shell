@@ -7,13 +7,21 @@ impl Parser {
     let mut parsed_args: Vec<String> = Vec::new();
     let mut arg: String = String::new();
     let mut in_single_quote: bool = false;
+    let mut in_double_quote: bool = false;
 
     for c in args.chars() {
       match c {
         '\'' => {
-          in_single_quote = !in_single_quote;
+          if in_double_quote {
+            arg.push(c);
+          } else { in_single_quote = !in_single_quote }
         },
-        c if c.is_whitespace() && !in_single_quote => {
+        '\"' => {
+          if in_single_quote {
+            arg.push(c);
+          } else { in_double_quote = !in_double_quote }
+        },
+        c if c.is_whitespace() && !in_single_quote && !in_double_quote=> {
           if arg.len() > 0 {
             parsed_args.push(arg);
             arg = String::new();
