@@ -213,4 +213,17 @@ mod tests {
       );
     }
   }
+
+
+  mod backslash_inside_single_quotes {
+    use super::super::Parser;
+
+    #[test]
+    fn backslash_in_single_quote() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo 'shell\\"\nscript'"#)).unwrap(),
+        vec!["echo", r#"shell\\"\nscript"#]
+      );
+    }
+  }
 }
