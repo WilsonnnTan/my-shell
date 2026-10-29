@@ -8,11 +8,11 @@ impl Parser {
     let mut arg: String = String::new();
     let mut in_single_quote: bool = false;
     let mut in_double_quote: bool = false;
-    let mut escape_char: bool = false;
+    let mut is_escaped_char: bool = false;
 
     for c in args.chars() {
       match c {
-        c if escape_char => { arg.push(c); escape_char = !escape_char; },
+        c if is_escaped_char => { arg.push(c); is_escaped_char = !is_escaped_char; },
         c if c.is_whitespace() && !in_single_quote && !in_double_quote => {
           if arg.len() > 0 {
             parsed_args.push(arg);
@@ -27,9 +27,7 @@ impl Parser {
           if in_single_quote { arg.push(c) }
           else { in_double_quote = !in_double_quote }
         },
-        '\\' => {
-          if !in_single_quote && !in_double_quote { escape_char = !escape_char }
-        },
+        '\\' if !in_single_quote && !in_double_quote => { is_escaped_char = !is_escaped_char },
         c => { arg.push(c) },
       }
     }
@@ -37,6 +35,7 @@ impl Parser {
     if in_single_quote { bail!("unterminated single quote") }
     if in_double_quote { bail!("unterminated double quote") }
 
+    if is_escaped_char { arg.push('\\') } // trailing backslash get printed
     if arg.len() > 0 { parsed_args.push(arg) }
     
     Ok(parsed_args)
@@ -203,6 +202,14 @@ mod tests {
       assert_eq!(
         Parser::parse(String::from(r#"echo \'hello\"\$\*\?\\"#)).unwrap(),
         vec!["echo", r#"'hello"$*?\"#]
+      );
+    }
+
+    #[test]
+    fn trailing_backslash() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo \"#)).unwrap(),
+        vec!["echo", r#"\"#]
       );
     }
   }
