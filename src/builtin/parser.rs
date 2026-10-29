@@ -12,7 +12,12 @@ impl Parser {
 
     for c in args.chars() {
       match c {
-        c if is_escaped_char => { arg.push(c); is_escaped_char = !is_escaped_char; },
+        c if is_escaped_char => {
+          // unhandled special characters (example: echo "\n" -> \n)
+          if in_double_quote && matches!(c, '$' | 'n' | '`') { arg.push('\\') }
+          arg.push(c);
+          is_escaped_char = !is_escaped_char;
+        },
         c if c.is_whitespace() && !in_single_quote && !in_double_quote => {
           if arg.len() > 0 {
             parsed_args.push(arg);
@@ -27,7 +32,7 @@ impl Parser {
           if in_single_quote { arg.push(c) }
           else { in_double_quote = !in_double_quote }
         },
-        '\\' if !in_single_quote && !in_double_quote => { is_escaped_char = !is_escaped_char },
+        '\\' if !in_single_quote => { is_escaped_char = !is_escaped_char },
         c => { arg.push(c) },
       }
     }
@@ -215,7 +220,7 @@ mod tests {
   }
 
 
-  mod backslash_inside_single_quotes {
+  mod backslash_within_single_quotes {
     use super::super::Parser;
 
     #[test]
@@ -223,6 +228,27 @@ mod tests {
       assert_eq!(
         Parser::parse(String::from(r#"echo 'shell\\"\nscript'"#)).unwrap(),
         vec!["echo", r#"shell\\"\nscript"#]
+      );
+    }
+  }
+
+
+  mod backslash_within_double_quotes {
+    use super::super::Parser;
+
+    #[test]
+    fn handled_special_characters() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo "shell\\\"script""#)).unwrap(),
+        vec!["echo", r#"shell\"script"#]
+      );
+    }
+    
+    #[test]
+    fn unhandled_special_characters() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo "shell\$\n\`script""#)).unwrap(),
+        vec!["echo", r#"shell\$\n\`script"#]
       );
     }
   }
