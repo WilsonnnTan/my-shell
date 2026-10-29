@@ -8,33 +8,34 @@ impl Parser {
     let mut arg: String = String::new();
     let mut in_single_quote: bool = false;
     let mut in_double_quote: bool = false;
+    let mut escape_char: bool = false;
 
     for c in args.chars() {
       match c {
-        '\'' => {
-          if in_double_quote {
-            arg.push(c);
-          } else { in_single_quote = !in_single_quote }
-        },
-        '\"' => {
-          if in_single_quote {
-            arg.push(c);
-          } else { in_double_quote = !in_double_quote }
-        },
-        c if c.is_whitespace() && !in_single_quote && !in_double_quote=> {
+        c if escape_char => { arg.push(c); escape_char = !escape_char; },
+        c if c.is_whitespace() && !in_single_quote && !in_double_quote => {
           if arg.len() > 0 {
             parsed_args.push(arg);
             arg = String::new();
           }
         },
-        c => {
-          arg.push(c);
+        '\'' => {
+          if in_double_quote { arg.push(c) } 
+          else { in_single_quote = !in_single_quote }
         },
+        '\"' => {
+          if in_single_quote { arg.push(c) }
+          else { in_double_quote = !in_double_quote }
+        },
+        '\\' => {
+          if !in_single_quote && !in_double_quote { escape_char = !escape_char }
+        },
+        c => { arg.push(c) },
       }
     }
 
-    if in_single_quote { bail!("uncompleted single quote") }
-    if in_double_quote { bail!("uncompleted double quote") }
+    if in_single_quote { bail!("unterminated single quote") }
+    if in_double_quote { bail!("unterminated double quote") }
 
     if arg.len() > 0 { parsed_args.push(arg) }
     
@@ -96,8 +97,8 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "uncompleted single quote")]
-    fn uncompleted_single_quote() {
+    #[should_panic(expected = "unterminated single quote")]
+    fn unterminated_single_quote() {
       Parser::parse(String::from("echo hello'world")).unwrap();
     }
   }
@@ -163,9 +164,46 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "uncompleted double quote")]
-    fn uncompleted_double_quote() {
+    #[should_panic(expected = "unterminated double quote")]
+    fn unterminated_double_quote() {
       Parser::parse(String::from(r#"echo hello"world"#)).unwrap();
+    }
+  }
+
+  
+  mod backslash_outside_quotes {
+    use super::super::Parser;
+
+    #[test]
+    fn each_backslash_creates_literal_space_as_part_of_one_argument() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo three\ \ \ spaces"#)).unwrap(),
+        vec!["echo", "three   spaces"]
+      );
+    }
+
+    #[test]
+    fn backslash_preserves_the_first_space_but_parser_collapses_the_subsequent_unescaped_spaces() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo before\     after"#)).unwrap(),
+        vec!["echo", "before ", "after"]
+      );
+    }
+
+    #[test]
+    fn backslash_n_just_become_n() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo test\nexample"#)).unwrap(),
+        vec!["echo", "testnexample"]
+      );
+    }
+
+    #[test]
+    fn backslash_convert_any_special_character_into_literal() {
+      assert_eq!(
+        Parser::parse(String::from(r#"echo \'hello\"\$\*\?\\"#)).unwrap(),
+        vec!["echo", r#"'hello"$*?\"#]
+      );
     }
   }
 }
