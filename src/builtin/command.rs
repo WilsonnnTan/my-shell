@@ -59,11 +59,11 @@ impl Command {
 }
 
 impl Run for Command {
-  fn run(args: Vec<&str>) {
+  fn run(args: Vec<String>) {
     // no args case
-    let Some(&command) = args.get(0) else { return };
+    let Some(command) = args.get(0) else { return };
 
-    match command {
+    match command.as_str() {
       "exit" => Exit::run(args),
       "echo" => Echo::run(args),
       "type" => Type::run(args),

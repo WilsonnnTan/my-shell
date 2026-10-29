@@ -1,3 +1,4 @@
+pub mod parser;
 pub mod command;
 pub mod echo;
 pub mod exit;
@@ -6,5 +7,5 @@ pub mod pwd;
 pub mod cd;
 
 pub trait Run {
-  fn run(args: Vec<&str>);
+  fn run(args: Vec<String>);
 }

@@ -17,13 +17,13 @@ impl Cd {
 }
 
 impl Run for Cd {
-  fn run(args: Vec<&str>) {
-    let Some(&dir_path) = args.get(1) else {
+  fn run(args: Vec<String>) {
+    let Some(dir_path) = args.get(1) else {
       eprintln!("cd: expected 1 args got 0");
       return;
     };
 
-    let dir_path = match dir_path {
+    let dir_path = match dir_path.as_str() {
       "~" => match Self::get_home_var() {
         Ok(home_dir) => PathBuf::from(home_dir),
         Err(e) => {

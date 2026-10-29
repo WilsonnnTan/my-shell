@@ -1,6 +1,10 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use my_shell::builtin::{command::Command, Run};
+use my_shell::builtin::{
+    command::Command,
+    Run,
+    parser::Parser
+};
 use anyhow::Result;
 
 fn main() -> Result<()> {
@@ -10,8 +14,8 @@ fn main() -> Result<()> {
 
         let mut args: String = String::new();
         io::stdin().read_line(&mut args)?;
-
-        let args: Vec<&str> = args.trim().split_whitespace().collect();
+        // use parser from library instead of hardcode on main.rs
+        let args: Vec<String> = Parser::parse(args).unwrap();
         Command::run(args);
     }
 }
