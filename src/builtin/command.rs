@@ -86,3 +86,43 @@ impl Run for Command {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{Command, env};
+
+  #[test]
+  fn search_executable_test() {
+    let temp_path = tempfile::tempdir().unwrap();
+
+    // set $PATH temporary and restore it at the end
+    let old_path = env::var_os("PATH").unwrap_or_default();
+    let mut new_path: Vec<std::path::PathBuf> = env::split_paths(&old_path).collect();
+    new_path.extend(vec![temp_path.path().to_path_buf()]);
+    let new_path = env::join_paths(new_path).unwrap();
+    unsafe { env::set_var("PATH", new_path) }
+
+    // create temp exe file
+    let file1 = tempfile::Builder::new()
+      .prefix("my test exe file")
+      .rand_bytes(0)
+      .tempfile_in(&temp_path.path())
+      .unwrap();
+
+    #[cfg(unix)]
+    {
+      use std::{fs, os::unix::fs::PermissionsExt};
+      fs::set_permissions(file1.path(), fs::Permissions::from_mode(0o111)).unwrap();
+    }
+
+    assert_eq!(
+      Command::search_executable("my test exe file").unwrap().as_path(),
+      file1.path()
+    );
+
+    assert!(Command::search_executable("nonexist_command").is_none());
+
+    // restore the original PATH for the test process
+    unsafe { env::set_var("PATH", old_path) }
+  }
+}
