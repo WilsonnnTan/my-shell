@@ -2,8 +2,8 @@
 use std::io::{self, Write};
 use my_shell::builtin::{
     command::Command,
-    Run,
-    parser::Parser
+    parser::Parser,
+    Token,
 };
 use anyhow::Result;
 
@@ -15,7 +15,7 @@ fn main() -> Result<()> {
         let mut args: String = String::new();
         io::stdin().read_line(&mut args)?;
         // use parser from library instead of hardcode on main.rs
-        let args: Vec<String> = Parser::parse(args).unwrap_or_else( |e| {
+        let args: Vec<Token> = Parser::parse(args).unwrap_or_else( |e| {
             eprintln!("failed to parse: {}", e);
             Vec::new()
         });

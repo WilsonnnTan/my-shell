@@ -14,6 +14,7 @@ use super::{
   r#type::Type, 
   pwd::Pwd,
   cd::Cd,
+  Token,
   Run
 };
 
@@ -56,14 +57,12 @@ impl Command {
 
     None
   }
-}
 
-impl Run for Command {
-  fn run(args: Vec<String>) {
+  pub fn run(args: Vec<Token>) {
     // no args case
-    let Some(command) = args.get(0) else { return };
+    let Some(&command) = args.get(0) else { return };
 
-    match command.as_str() {
+    match command {
       "exit" => Exit::run(args),
       "echo" => Echo::run(args),
       "type" => Type::run(args),
