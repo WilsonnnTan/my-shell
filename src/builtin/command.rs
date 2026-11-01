@@ -4,11 +4,13 @@ use std::{
   path::{Path, PathBuf}, 
   process,
   process::Output, 
-  ffi::OsString
+  ffi::OsString,
 };
 
 #[cfg(unix)]
 use std::{fs, os::unix::fs::PermissionsExt};
+
+use crate::builtin::OutputExt;
 
 use super::{
   echo::Echo, 
@@ -90,7 +92,7 @@ impl Command {
     // return Ok if user doesn't type anything
     let Some(command) = seperated_command.get(0) else { return Ok(()) };
 
-    let mut command_output: Output;
+    let mut command_output: Output = Output::build_output(0, String::new(), String::new());
 
     match command.as_str() {
       "exit" => command_output = Exit::run(seperated_command),
@@ -109,6 +111,12 @@ impl Command {
         }
         None => println!("{}: command not found", command),
       }
+    }
+
+    let mut iter = redirect.into_iter();
+
+    while let Some((redir, path)) = iter.next() {
+      redir.apply(&command_output, path)?;
     }
 
     Ok(())
