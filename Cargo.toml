@@ -1,5 +1,5 @@
 [package]
-name = "codecrafters-shell"
+name = "my-shell"
 version = "0.1.0"
 authors = ["WilsonnnTan <wilsonangelietann@gmail.com>"]
 edition = "2024"
