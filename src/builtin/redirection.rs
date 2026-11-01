@@ -1,5 +1,4 @@
 use std::{
-  fs::File,
   process::Output,
   path::PathBuf,
 };

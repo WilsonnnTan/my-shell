@@ -21,7 +21,7 @@ pub fn exit_status(code: i32) -> ExitStatus{
 
 #[cfg(unix)]
 pub fn exit_status(code: i32) -> ExitStatus{
-  use std::os::windows::process::ExitStatusExt;
+  use std::os::unix::process::ExitStatusExt;
   ExitStatus::from_raw(code << 8)
 }
 

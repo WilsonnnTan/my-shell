@@ -1,5 +1,3 @@
-use std::fs::File;
-
 use anyhow::{Result, bail};
 use crate::builtin::redirection::{
   FileDescriptor,
