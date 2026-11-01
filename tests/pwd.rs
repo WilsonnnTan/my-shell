@@ -6,7 +6,7 @@ mod tests {
   fn pwd_test() {
     let dir = tempfile::tempdir().unwrap();
     let expected = dir.path();
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .current_dir(expected)
       .write_stdin("pwd\nexit")
       .assert()

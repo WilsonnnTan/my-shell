@@ -8,7 +8,7 @@ mod tests {
     let home = tempfile::tempdir().unwrap();
     let not_home = tempfile::tempdir().unwrap();
 
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .current_dir(not_home.path())
       .env("HOME", home.path())
       .env("HOMEPATH", home.path())

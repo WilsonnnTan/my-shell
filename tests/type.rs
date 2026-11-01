@@ -4,7 +4,7 @@ mod tests {
 
   #[test]
   fn expect_atleast_1_argument() {
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .write_stdin("type\nexit")
       .assert()
       .success()
@@ -13,7 +13,7 @@ mod tests {
 
   #[test]
   fn type_builtin_test() {
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .write_stdin("type echo\nexit")
       .assert()
       .success()
@@ -22,7 +22,7 @@ mod tests {
 
   #[test]
   fn type_not_found_test() {
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .write_stdin("type unregistered_command\nexit")
       .assert()
       .success()

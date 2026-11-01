@@ -4,7 +4,7 @@ mod tests {
 
   #[test]
   fn echo_test() {
-    assert_cmd::Command::cargo_bin("codecrafters-shell").unwrap()
+    assert_cmd::Command::cargo_bin("my-shell").unwrap()
       .write_stdin("echo hello world\nexit")
       .assert()
       .success()
