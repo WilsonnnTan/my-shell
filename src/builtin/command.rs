@@ -89,27 +89,27 @@ impl Command {
       }
     }
 
-    // return Ok if user doesn't type anything
-    let Some(command) = seperated_command.get(0) else { return Ok(()) };
-
     let mut command_output: Output = Output::build_output(0, String::new(), String::new());
 
-    match command.as_str() {
-      "exit" => command_output = Exit::run(seperated_command),
-      "echo" => command_output = Echo::run(seperated_command),
-      "type" => command_output = Type::run(seperated_command),
-      "pwd" => command_output = Pwd::run(seperated_command),
-      "cd" => command_output = Cd::run(seperated_command),
-      _ => match Self::search_executable(command) {
-        Some(file_path) => {
-          // Run command with executable file
-          command_output = process::Command::new(command)
-            .current_dir(file_path.parent().unwrap_or(Path::new(".")))
-            .args(&seperated_command[1..])
-            .output()
-            .context("Command recognized but failed to run")?;
+    // skip command arm for empty command
+    if let Some(command) = seperated_command.get(0) {
+      match command.as_str() {
+        "exit" => command_output = Exit::run(seperated_command),
+        "echo" => command_output = Echo::run(seperated_command),
+        "type" => command_output = Type::run(seperated_command),
+        "pwd" => command_output = Pwd::run(seperated_command),
+        "cd" => command_output = Cd::run(seperated_command),
+        _ => match Self::search_executable(command) {
+          Some(file_path) => {
+            // Run command with executable file
+            command_output = process::Command::new(command)
+              .current_dir(file_path.parent().unwrap_or(Path::new(".")))
+              .args(&seperated_command[1..])
+              .output()
+              .context("Command recognized but failed to run")?;
+          }
+          None => println!("{}: command not found", command),
         }
-        None => println!("{}: command not found", command),
       }
     }
 

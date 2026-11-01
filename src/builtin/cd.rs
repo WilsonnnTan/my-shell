@@ -24,7 +24,7 @@ impl Run for Cd {
 
     let Some(dir_path) = args.get(1) else {
       status_code = 1;
-      stderr = format!("cd: expected 1 args got 0");
+      stderr = format!("cd: expected 1 args got 0\n");
       eprint!("{}", stderr);
       
       return Output::build_output(status_code, stdout, stderr)
@@ -35,7 +35,7 @@ impl Run for Cd {
         Ok(home_dir) => PathBuf::from(home_dir),
         Err(e) => {
           status_code = 1;
-          stderr = format!("cd: {}", e);
+          stderr = format!("cd: {}\n", e);
           eprint!("{}", stderr);
 
           return Output::build_output(status_code, stdout, stderr)
@@ -48,13 +48,13 @@ impl Run for Cd {
       true => {
         if let Err(e) = env::set_current_dir(&dir_path) {
           status_code = 1;
-          stderr = format!("cd: {}: {}", dir_path.display(), e);
+          stderr = format!("cd: {}: {}\n", dir_path.display(), e);
           eprint!("{}", stderr);
         }
       },
       false => {
         status_code = 1;
-        stderr = format!("cd: {}: No such file or directory", dir_path.display());
+        stderr = format!("cd: {}: No such file or directory\n", dir_path.display());
         eprint!("{}", stderr);
       }
     }

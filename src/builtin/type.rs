@@ -13,18 +13,18 @@ impl Run for Type {
 
     let Some(command) = args.get(1) else { 
       status_code = 1;
-      stderr = format!("type: expected 1 args got 0 \n");
+      stderr = format!("type: expected 1 args got 0\n");
       eprint!("{}", stderr);
 
       return Output::build_output(status_code, stdout, stderr)
     };
 
     if BUILTIN_COMMANDS.contains(&command.as_str()) {
-      stdout = format!("{} is a shell builtin", command);
+      stdout = format!("{} is a shell builtin\n", command);
     } else if let Some(file_path) = Command::search_executable(command){
-      stdout = format!("{} is {}", command, file_path.display());
+      stdout = format!("{} is {}\n", command, file_path.display());
     } else {
-      stdout = format!("{}: not found", command);
+      stdout = format!("{}: not found\n", command);
     }
 
     print!("{}", stdout);

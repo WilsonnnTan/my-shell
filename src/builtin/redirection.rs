@@ -53,6 +53,8 @@ impl Redirection {
       _ => {},
     }
 
-     Ok(())
+    Ok(())
   }
 }
+
+// write unittest for apply
