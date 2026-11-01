@@ -1,22 +1,34 @@
-use super::{Run, command::Command};
+use super::{Run, OutputExt, command::Command};
+use std::process::{Output};
 
 const BUILTIN_COMMANDS: [&str; 5] = ["echo", "exit", "type", "pwd", "cd"];
 
 pub struct Type;
 
 impl Run for Type {
-  fn run(args: Vec<String>) {
+  fn run(args: Vec<String>) -> Output {
+    let mut stdout: String = String::new();
+    let mut stderr: String = String::new();
+    let mut status_code: i32 = 0;
+
     let Some(command) = args.get(1) else { 
-      eprintln!("type: expected 1 args got 0");
-      return;
+      status_code = 1;
+      stderr = format!("type: expected 1 args got 0 \n");
+      eprint!("{}", stderr);
+
+      return Output::build_output(status_code, stdout, stderr)
     };
 
     if BUILTIN_COMMANDS.contains(&command.as_str()) {
-      println!("{} is a shell builtin",command)
+      stdout = format!("{} is a shell builtin", command);
     } else if let Some(file_path) = Command::search_executable(command){
-      println!("{} is {}", command, file_path.display());
+      stdout = format!("{} is {}", command, file_path.display());
     } else {
-      println!("{}: not found", command);
+      stdout = format!("{}: not found", command);
     }
+
+    print!("{}", stdout);
+
+    Output::build_output(status_code, stdout, stderr)
   }
 }

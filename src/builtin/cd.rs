@@ -1,5 +1,5 @@
-use super::{Run};
-use std::{env, path::PathBuf};
+use super::{Run, OutputExt};
+use std::{env, path::PathBuf, process::Output};
 use anyhow::{Result, Context};
 
 pub struct Cd;
@@ -17,18 +17,28 @@ impl Cd {
 }
 
 impl Run for Cd {
-  fn run(args: Vec<String>) {
+  fn run(args: Vec<String>) -> Output {
+    let stdout: String = String::new();
+    let mut stderr: String = String::new();
+    let mut status_code: i32 = 0;
+
     let Some(dir_path) = args.get(1) else {
-      eprintln!("cd: expected 1 args got 0");
-      return;
+      status_code = 1;
+      stderr = format!("cd: expected 1 args got 0");
+      eprint!("{}", stderr);
+      
+      return Output::build_output(status_code, stdout, stderr)
     };
 
     let dir_path = match dir_path.as_str() {
       "~" => match Self::get_home_var() {
         Ok(home_dir) => PathBuf::from(home_dir),
         Err(e) => {
-          eprintln!("cd: {}", e);
-          return;
+          status_code = 1;
+          stderr = format!("cd: {}", e);
+          eprint!("{}", stderr);
+
+          return Output::build_output(status_code, stdout, stderr)
         },
       },
       _ => PathBuf::from(dir_path),
@@ -37,10 +47,18 @@ impl Run for Cd {
     match dir_path.is_dir() {
       true => {
         if let Err(e) = env::set_current_dir(&dir_path) {
-          eprintln!("cd: {}: {}", dir_path.display(), e);
+          status_code = 1;
+          stderr = format!("cd: {}: {}", dir_path.display(), e);
+          eprint!("{}", stderr);
         }
       },
-      false => eprintln!("cd: {}: No such file or directory", dir_path.display()),
+      false => {
+        status_code = 1;
+        stderr = format!("cd: {}: No such file or directory", dir_path.display());
+        eprint!("{}", stderr);
+      }
     }
+
+    return Output::build_output(status_code, stdout, stderr)
   }
 }

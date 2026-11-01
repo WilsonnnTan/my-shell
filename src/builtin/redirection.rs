@@ -1,4 +1,8 @@
-use std::fs::File;
+use std::{
+  fs::File,
+  process::Output,
+  path::PathBuf,
+};
 
 #[derive(PartialEq, Debug)]
 #[repr(u8)]
@@ -15,6 +19,9 @@ pub enum RedirectKind {
   Append = 2,
 }
 
+// the reason I dont include PathBuf in Redirection because
+// redirection operator is a standalone and there is also a case where
+// "missing file specification after redirection operator" error
 #[derive(Debug, PartialEq)]
 pub struct Redirection {
   file_descriptor: FileDescriptor,
@@ -24,5 +31,9 @@ pub struct Redirection {
 impl Redirection {
   pub fn new(file_descriptor: FileDescriptor, redirect_kind: RedirectKind) -> Self {
     Self { file_descriptor, redirect_kind }
+  }
+
+  pub fn apply(&self, output: Output, file_path: PathBuf) {
+    todo!()
   }
 }

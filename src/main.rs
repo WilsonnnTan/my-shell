@@ -19,6 +19,9 @@ fn main() -> Result<()> {
             eprintln!("failed to parse: {}", e);
             Vec::new()
         });
-        Command::run(args);
+        
+        Command::run(args).unwrap_or_else(|e| {
+            eprintln!("failed to run command: {}", e);
+        });
     }
 }

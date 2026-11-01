@@ -1,7 +1,9 @@
+/// This is the module to run the command, process the special operator, and search for executeable
 use std::{
   env, 
   path::{Path, PathBuf}, 
-  process, 
+  process,
+  process::Output, 
   ffi::OsString
 };
 
@@ -14,9 +16,13 @@ use super::{
   r#type::Type, 
   pwd::Pwd,
   cd::Cd,
+  Redirection,
   Token,
   Run
 };
+
+use anyhow::{Result, bail, Context};
+
 
 pub struct Command;
 
@@ -43,7 +49,7 @@ impl Command {
   pub fn search_executable(command: &str) -> Option<PathBuf>{
     // use OsString to support all Os buf
     let path_var= env::var_os("PATH").unwrap_or_else( || {
-      eprintln!("could not read $PATH");
+      eprintln!("Could not read $PATH");
       OsString::new()
     });
     let paths= env::split_paths(&path_var);
@@ -58,31 +64,54 @@ impl Command {
     None
   }
 
-  pub fn run(args: Vec<Token>) {
-    // no args case
-    let Some(&command) = args.get(0) else { return };
+  pub fn run(args: Vec<Token>) -> Result<()> {
+    let mut seperated_command: Vec<String> = Vec::new();
+    let mut redirect: Vec<(Redirection, PathBuf)> = Vec::new();
 
-    match command {
-      "exit" => Exit::run(args),
-      "echo" => Echo::run(args),
-      "type" => Type::run(args),
-      "pwd" => Pwd::run(args),
-      "cd" => Cd::run(args),
+    // convert the Token type into String and Redirection
+    // seperate redirection and the actual command and arg
+    let mut iter = args.into_iter().peekable();    
+    while let Some(arg) = iter.next() {
+      match arg {
+        Token::Redirection(redir) => {
+          // store the Redirection and the next args by taking it as a path file
+          // if no path file then we return an error
+          match iter.next() {
+            Some(Token::Word(path)) => { redirect.push((redir, PathBuf::from(path))) },
+            _ => { bail!("Missing file specification after redirection operator"); }
+          }
+        },
+        Token::Word(word) => {
+          seperated_command.push(word);
+        }
+      }
+    }
+
+    // return Ok if user doesn't type anything
+    let Some(command) = seperated_command.get(0) else { return Ok(()) };
+
+    let mut command_output: Output;
+
+    match command.as_str() {
+      "exit" => command_output = Exit::run(seperated_command),
+      "echo" => command_output = Echo::run(seperated_command),
+      "type" => command_output = Type::run(seperated_command),
+      "pwd" => command_output = Pwd::run(seperated_command),
+      "cd" => command_output = Cd::run(seperated_command),
       _ => match Self::search_executable(command) {
         Some(file_path) => {
           // Run command with executable file
-          let out = process::Command::new(command)
+          command_output = process::Command::new(command)
             .current_dir(file_path.parent().unwrap_or(Path::new(".")))
-            .args(&args[1..])
+            .args(&seperated_command[1..])
             .output()
-            .expect("Exectuable exist but failed to run");
-
-          print!("{}", String::from_utf8_lossy(&out.stdout));
-          eprint!("{}", String::from_utf8_lossy(&out.stderr));
+            .context("Command recognized but failed to run")?;
         }
         None => println!("{}: command not found", command),
       }
     }
+
+    Ok(())
   }
 }
 
